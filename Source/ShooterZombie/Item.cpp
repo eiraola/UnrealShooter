@@ -5,6 +5,8 @@
 #include "Components/SkeletalMeshComponent.h"
 #include "Components/BoxComponent.h"
 #include "Components/WidgetComponent.h"
+#include "Components/SphereComponent.h"
+#include "ShooterMain.h"
 // Sets default values
 AItem::AItem()
 {
@@ -16,6 +18,8 @@ AItem::AItem()
 	CollisionBox->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
 	CollisionBox->SetCollisionResponseToChannel(ECollisionChannel::ECC_Visibility,ECollisionResponse::ECR_Block);
 	CollisionBox->SetupAttachment(RootComponent);
+	CollisionSphere = CreateDefaultSubobject<USphereComponent>(TEXT("CollisionSphere"));
+	CollisionSphere->SetupAttachment(RootComponent);
 	ItemWidget = CreateDefaultSubobject<UWidgetComponent>(TEXT("Widget"));
 	ItemWidget->SetupAttachment(RootComponent);
 
@@ -25,8 +29,31 @@ AItem::AItem()
 void AItem::BeginPlay()
 {
 	Super::BeginPlay();
+	CollisionSphere->OnComponentBeginOverlap.AddDynamic(this, &AItem::OnSphereOverlap);
+	CollisionSphere->OnComponentEndOverlap.AddDynamic(this, &AItem::OnSphereEbdOverlap);
 	ItemWidget->SetVisibility(false);
 	
+}
+
+void AItem::OnSphereOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+{
+	if (OtherActor)
+	{
+		AShooterMain* main = Cast<AShooterMain>(OtherActor);
+		if (main)
+		main->InCrementOverlappedItems(1);
+	}
+}
+
+void AItem::OnSphereEbdOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
+{
+	if (OtherActor)
+	{
+		AShooterMain* main = Cast<AShooterMain>(OtherActor);
+		if(main)
+		main->InCrementOverlappedItems(-1);
+		GetWidgetComponent()->SetVisibility(false);
+	}
 }
 
 // Called every frame

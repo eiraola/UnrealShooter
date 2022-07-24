@@ -72,6 +72,8 @@ private:
 	void StopAim();
 	void SetAiminFOV(float DeltaTime);
 	void SetLookRates();
+	UFUNCTION()
+	void CheckForItems();
 
 
 
@@ -102,13 +104,21 @@ private:
 	void AutoFireReset();
 	UFUNCTION(BlueprintCallable)
 	bool TraceUnderCrosshairs(FHitResult& OutHitResult);
+	bool bShouldCheckForItems;
+	int NumberOverlappedItems;
+	class AItem* CurrentCheckedItem;
+
 public:
 	UFUNCTION(BlueprintCallable)
 	bool IsAiming();
 	FORCEINLINE USpringArmComponent* GetCameraBoom() const { return CameraBoom; }
 	FORCEINLINE UCameraComponent* GetCamera() const { return FollowCamera; }
+	FORCEINLINE int GetOverlappedItems() const { return NumberOverlappedItems; }
 	UFUNCTION(BlueprintCallable)
-		float GetCrosshairSpreadMultiplier() { return CrosshairSpreadMultiplier; };
+	float GetCrosshairSpreadMultiplier() { return CrosshairSpreadMultiplier; };
 	void SetWeapon(AActor* weapon);
+	void InCrementOverlappedItems(int amount);
+	void DecreaseOverlappedItems(int amount);
+
 
 };

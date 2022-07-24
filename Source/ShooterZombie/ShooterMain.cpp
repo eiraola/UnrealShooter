@@ -50,6 +50,9 @@ AShooterMain::AShooterMain()
 	GetCharacterMovement()->AirControl = 0.02f;
 	GetCharacterMovement()->JumpZVelocity = 600.0f;
 
+	bShouldCheckForItems = false;
+	NumberOverlappedItems = 0;
+
 }
 
 // Called when the game starts or when spawned
@@ -60,7 +63,7 @@ void AShooterMain::BeginPlay()
 		regularFOV = FollowCamera->FieldOfView;
 		currentFOV = FollowCamera->FieldOfView;
 	}
-	
+	NumberOverlappedItems = 0;
 }
 
 void AShooterMain::CalculateCrossHairSpread(float Deltatime)
@@ -113,18 +116,8 @@ void AShooterMain::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 	SetAiminFOV(DeltaTime);
 	CalculateCrossHairSpread(DeltaTime);
-	FHitResult ItemTraceResult;
-	TraceUnderCrosshairs(ItemTraceResult);
-	if (ItemTraceResult.bBlockingHit)
-	{
-		UE_LOG(LogTemp, Warning, TEXT("ChocaConAlgo"));
-		AItem* HitItem = Cast<AItem>(ItemTraceResult.GetActor());
-		if (HitItem && HitItem->GetWidgetComponent())
-		{
-			UE_LOG(LogTemp, Warning, TEXT("EsUnItem"));
-			HitItem->GetWidgetComponent()->SetVisibility(true);
-		}
-	}
+	CheckForItems();
+	
 }
 void AShooterMain::SetAiminFOV(float DeltaTime) {
 	if (bIsAiming) {
@@ -140,6 +133,30 @@ void AShooterMain::SetAiminFOV(float DeltaTime) {
 }
 void AShooterMain::SetLookRates()
 {
+}
+void AShooterMain::CheckForItems()
+{
+	if (!bShouldCheckForItems) return;
+	FHitResult ItemTraceResult;
+	TraceUnderCrosshairs(ItemTraceResult);
+	if (ItemTraceResult.bBlockingHit)
+	{
+		AItem* HitItem = Cast<AItem>(ItemTraceResult.GetActor());
+		if (HitItem && HitItem->GetWidgetComponent())
+		{
+			if (CurrentCheckedItem && CurrentCheckedItem != HitItem) {
+				CurrentCheckedItem->GetWidgetComponent()->SetVisibility(false);
+			}
+			CurrentCheckedItem = HitItem;
+			HitItem->GetWidgetComponent()->SetVisibility(true);
+			return;
+		}
+		
+	}
+	if (CurrentCheckedItem) {
+		CurrentCheckedItem->GetWidgetComponent()->SetVisibility(false);
+		CurrentCheckedItem = nullptr;
+	}
 }
 // Called to bind functionality to input
 void AShooterMain::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
@@ -258,6 +275,23 @@ void AShooterMain::SetWeapon(AActor* weapon)
 		Weapon = rifle;
 	}
 }
+void AShooterMain::InCrementOverlappedItems(int amount)
+{
+	NumberOverlappedItems += amount;
+	if (NumberOverlappedItems > 0)
+	{
+		bShouldCheckForItems = true;
+	}
+}
+void AShooterMain::DecreaseOverlappedItems(int amount)
+{
+	NumberOverlappedItems -= amount;
+	if (NumberOverlappedItems <= 0)
+	{
+		NumberOverlappedItems = 0;
+		bShouldCheckForItems = false;
+	}
+}
 bool AShooterMain::IsAiming() {
 	return bIsAiming;
 
@@ -300,18 +334,15 @@ bool AShooterMain::TraceUnderCrosshairs(FHitResult& OutHitResult)
 	}
 	
 	FVector2D crosshairLocation(viewportSize.X / 2.0f, viewportSize.Y / 2.0f);
-	//crosshairLocation.Y -= 20.f;
 	bool bCrosshhairPos = UGameplayStatics::DeprojectScreenToWorld(UGameplayStatics::GetPlayerController(this, 0), crosshairLocation, WorldPosition, WorldDirection);
 	if (bCrosshhairPos)
 	{
-		//DoSomething
 		FVector Start{ WorldPosition };
 		FVector End{ WorldPosition + WorldDirection * 5000000.f};
 		GetWorld()->LineTraceSingleByChannel(OutHitResult,
 			Start,
 			End,
 			ECollisionChannel::ECC_Visibility);
-		//DrawDebugLine(GetWorld(), Start, End, FColor::Red, false, 1.0f);
 		if (OutHitResult.bBlockingHit)
 		{
 			return true;
