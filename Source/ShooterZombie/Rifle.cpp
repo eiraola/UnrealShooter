@@ -72,7 +72,7 @@ void ARifle::Shoot()
 		}
 		UE_LOG(LogTemp, Warning, TEXT("Empieza el calculo"));
 		FVector2D crosshairLocation(viewportSize.X / 2.0f, viewportSize.Y / 2.0f);
-		crosshairLocation.Y -= 20.f;
+		crosshairLocation.Y -= 40.f;
 		bool bCrosshhairPos = UGameplayStatics::DeprojectScreenToWorld(UGameplayStatics::GetPlayerController(this, 0), crosshairLocation, WorldPosition, WorldRotation);
 		if (bCrosshhairPos) {
 			UE_LOG(LogTemp, Warning, TEXT("Calculamos las coordenadas del mundo"));
@@ -89,10 +89,10 @@ void ARifle::Shoot()
 					FVector start = socket->GetSocketTransform(Mesh).GetLocation();
 					FVector end = (start + ((ScreenTracehit.Location - start)*2));
 					GetWorld()->LineTraceSingleByChannel(hit, start, end , ECollisionChannel::ECC_Visibility);
-					DrawDebugLine(GetWorld(), start, end, FColor::Red, false, 1.0f);
+					//DrawDebugLine(GetWorld(), start, end, FColor::Red, false, 1.0f);
 					if (hit.bBlockingHit) {
 						UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), CC_Impact, hit.Location, hit.ImpactNormal.Rotation(), FVector(0.5f, 0.5f,0.5f));
-						DrawDebugLine(GetWorld(), start, end, FColor::Red, false, 1.0f);
+						//DrawDebugLine(GetWorld(), start, end, FColor::Red, false, 1.0f);
 						//UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(), NS_Impact, hit.Location, hit.ImpactNormal.Rotation(), FVector(2.1f, 2.1f, 2.1f), true, true, ENCPoolMethod::FreeInPool, true);
 					}
 					
