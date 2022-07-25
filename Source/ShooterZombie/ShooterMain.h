@@ -22,6 +22,8 @@ protected:
 	void StartCrosshairBulletFire();
 	UFUNCTION()
 	void FinishCrosshairBulletFire();
+	UFUNCTION()
+	void SpawnDefaultWeapon();
 
 public:	
 	// Called every frame
@@ -84,6 +86,9 @@ private:
 	class UCameraComponent* FollowCamera;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Weapons, meta = (AllowPrivateAccess = true))
 	AActor* Weapon;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Weapons, meta = (AllowPrivateAccess = true))
+	TSubclassOf<class AWeapon> InitWeapon;
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Camera, meta = (AllowPrivateAccess = true))
 	class UAnimMontage* montage;
 	float ShootTimeDuration;

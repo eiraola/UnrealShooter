@@ -12,6 +12,7 @@
 #include "Item.h"
 #include "Components/WidgetComponent.h"
 #include "DrawDebugHelpers.h"
+#include "Weapon.h"
 // Sets default values
 AShooterMain::AShooterMain()
 {
@@ -64,6 +65,7 @@ void AShooterMain::BeginPlay()
 		currentFOV = FollowCamera->FieldOfView;
 	}
 	NumberOverlappedItems = 0;
+	SpawnDefaultWeapon();
 }
 
 void AShooterMain::CalculateCrossHairSpread(float Deltatime)
@@ -106,6 +108,20 @@ void AShooterMain::StartCrosshairBulletFire()
 void AShooterMain::FinishCrosshairBulletFire()
 {
 	bIsFiringBullet = false;
+}
+
+void AShooterMain::SpawnDefaultWeapon()
+{
+	if (InitWeapon)
+	{
+		FActorSpawnParameters params;
+		AWeapon* DefaultWeapon = GetWorld()->SpawnActor<AWeapon>(InitWeapon);
+		const USkeletalMeshSocket* HandSocket = GetMesh()->GetSocketByName(FName("FuturisticSocket"));
+		if (HandSocket)
+		{
+			HandSocket->AttachActor(DefaultWeapon, GetMesh());
+		}
+	}
 }
 
 
