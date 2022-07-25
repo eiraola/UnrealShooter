@@ -22,6 +22,8 @@ protected:
 	void StartCrosshairBulletFire();
 	UFUNCTION()
 	void FinishCrosshairBulletFire();
+	UFUNCTION()
+	void SpawnDefaultWeapon();
 
 public:	
 	// Called every frame
@@ -72,6 +74,8 @@ private:
 	void StopAim();
 	void SetAiminFOV(float DeltaTime);
 	void SetLookRates();
+	UFUNCTION()
+	void CheckForItems();
 
 
 
@@ -82,6 +86,9 @@ private:
 	class UCameraComponent* FollowCamera;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Weapons, meta = (AllowPrivateAccess = true))
 	AActor* Weapon;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Weapons, meta = (AllowPrivateAccess = true))
+	TSubclassOf<class AWeapon> InitWeapon;
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Camera, meta = (AllowPrivateAccess = true))
 	class UAnimMontage* montage;
 	float ShootTimeDuration;
@@ -102,13 +109,21 @@ private:
 	void AutoFireReset();
 	UFUNCTION(BlueprintCallable)
 	bool TraceUnderCrosshairs(FHitResult& OutHitResult);
+	bool bShouldCheckForItems;
+	int NumberOverlappedItems;
+	class AItem* CurrentCheckedItem;
+
 public:
 	UFUNCTION(BlueprintCallable)
 	bool IsAiming();
 	FORCEINLINE USpringArmComponent* GetCameraBoom() const { return CameraBoom; }
 	FORCEINLINE UCameraComponent* GetCamera() const { return FollowCamera; }
+	FORCEINLINE int GetOverlappedItems() const { return NumberOverlappedItems; }
 	UFUNCTION(BlueprintCallable)
-		float GetCrosshairSpreadMultiplier() { return CrosshairSpreadMultiplier; };
+	float GetCrosshairSpreadMultiplier() { return CrosshairSpreadMultiplier; };
 	void SetWeapon(AActor* weapon);
+	void InCrementOverlappedItems(int amount);
+	void DecreaseOverlappedItems(int amount);
+
 
 };

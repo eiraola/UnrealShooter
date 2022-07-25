@@ -47,7 +47,10 @@ void ARifle::OnSphereBeginOverlap(UPrimitiveComponent* OverlappedComponent, AAct
 		Mesh->SetCollisionResponseToChannel(ECollisionChannel::ECC_Pawn, ECollisionResponse::ECR_Ignore);
 		Mesh->SetSimulatePhysics(false);
 		AShooterMain* player = Cast<AShooterMain>(OtherActor);
-		player->SetWeapon(this);
+		if (player) {
+			player->SetWeapon(this);
+		}
+		
 	}
 }
 
@@ -59,10 +62,7 @@ void ARifle::Shoot()
 		
 		FTransform socketTransform = socket->GetSocketTransform(Mesh);
 		if(NS_Shoot){
-			
-			
 		UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), CC_Shoot, socketTransform.GetLocation(), socketTransform.GetRotation().Rotator(), FVector(0.25f, 0.25f, 0.25f));
-		//UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(), NS_Shoot, socketTransform.GetLocation(), socketTransform.GetRotation().Rotator(), FVector(2.1f, 2.1f,2.1f), true, true, ENCPoolMethod::FreeInPool, true);
 		}
 		FVector2D viewportSize;
 		FVector WorldPosition;
@@ -89,11 +89,8 @@ void ARifle::Shoot()
 					FVector start = socket->GetSocketTransform(Mesh).GetLocation();
 					FVector end = (start + ((ScreenTracehit.Location - start)*2));
 					GetWorld()->LineTraceSingleByChannel(hit, start, end , ECollisionChannel::ECC_Visibility);
-					//DrawDebugLine(GetWorld(), start, end, FColor::Red, false, 1.0f);
 					if (hit.bBlockingHit) {
 						UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), CC_Impact, hit.Location, hit.ImpactNormal.Rotation(), FVector(0.5f, 0.5f,0.5f));
-						//DrawDebugLine(GetWorld(), start, end, FColor::Red, false, 1.0f);
-						//UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(), NS_Impact, hit.Location, hit.ImpactNormal.Rotation(), FVector(2.1f, 2.1f, 2.1f), true, true, ENCPoolMethod::FreeInPool, true);
 					}
 					
 				}
@@ -101,17 +98,6 @@ void ARifle::Shoot()
 
 			}
 		}
-		//FHitResult hit;																							 
-		//FVector start = socket->GetSocketTransform(Mesh).GetLocation();
-		//FVector end = (socket->GetSocketTransform(Mesh).GetRotation().GetForwardVector() * 1000) + start;
-		//GetWorld()->LineTraceSingleByChannel(hit, start, end, ECollisionChannel::ECC_Visibility);
-		//
-		//if (hit.bBlockingHit) {
-		//	//DrawDebugLine(GetWorld(), start, end, FColor::Red, false, 1.0f);
-		//	//DrawDebugPoint(GetWorld(), hit.ImpactPoint,120.0f,FColor::Blue, false, 1.0f);
-		//	if(NS_Impact)
-		//	UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(), NS_Impact, hit.ImpactPoint, hit.ImpactNormal.Rotation(), FVector(2.1f, 2.1f, 2.1f), true, true, ENCPoolMethod::FreeInPool, true);
-		//}
 	}
 }
 
