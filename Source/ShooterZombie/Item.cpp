@@ -8,7 +8,7 @@
 #include "Components/SphereComponent.h"
 #include "ShooterMain.h"
 // Sets default values
-AItem::AItem()
+AItem::AItem() : ItemRarity(EItemRarity::EIR_Common)
 {
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
@@ -22,7 +22,9 @@ AItem::AItem()
 	CollisionSphere->SetupAttachment(RootComponent);
 	ItemWidget = CreateDefaultSubobject<UWidgetComponent>(TEXT("Widget"));
 	ItemWidget->SetupAttachment(RootComponent);
-
+	ItemName = FName("Default").ToString();
+	ItemCount = 0;
+	
 }
 
 // Called when the game starts or when spawned
@@ -31,7 +33,9 @@ void AItem::BeginPlay()
 	Super::BeginPlay();
 	CollisionSphere->OnComponentBeginOverlap.AddDynamic(this, &AItem::OnSphereOverlap);
 	CollisionSphere->OnComponentEndOverlap.AddDynamic(this, &AItem::OnSphereEbdOverlap);
+	if (ItemWidget)
 	ItemWidget->SetVisibility(false);
+	SetActiveStars();
 	
 }
 
@@ -56,10 +60,40 @@ void AItem::OnSphereEbdOverlap(UPrimitiveComponent* OverlappedComponent, AActor*
 	}
 }
 
+void AItem::SetActiveStars()
+{
+	for (int32 i = 0; i <= 5; i++)
+	{
+		ActiveStars.Add(false);
+	}
+	switch (ItemRarity)
+	{
+	case EItemRarity::EIR_Legendary:
+		ActiveStars[5] = true;
+	case EItemRarity::EIR_Rare:
+		ActiveStars[4] = true;
+	case EItemRarity::EIR_Uncommon:
+		ActiveStars[3] = true;
+	case EItemRarity::EIR_Common:
+		ActiveStars[2] = true;
+	case EItemRarity::EIR_Damaged:
+		ActiveStars[1] = true;
+		break;
+
+	
+
+
+	
+	default:
+		break;
+	}
+}
+
+
+
 // Called every frame
 void AItem::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-
 }
 
